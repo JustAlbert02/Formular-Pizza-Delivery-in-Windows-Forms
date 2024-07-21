@@ -20,7 +20,7 @@ namespace Proiect
             InitializeComponent();
             comenzi = new BindingList<Client>();
             dgvLogComenzi.DataSource = comenzi;
-            
+
         }
 
         public void adaugaComandaInLog(Client client)
@@ -34,8 +34,33 @@ namespace Proiect
 
         }
 
+        public void EnsureDatabaseSetup()
+        {
+            using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+            {
+                connection.Open();
+
+                string createTableQuery = @"
+                CREATE TABLE IF NOT EXISTS ""Comenzi"" (
+	                ""idClient""	INTEGER NOT NULL UNIQUE,
+	                ""nume""	TEXT NOT NULL,
+	                ""prenume""	TEXT NOT NULL,
+	                ""adresa""	TEXT NOT NULL,
+	                ""pizze""	TEXT NOT NULL,
+	                ""telefon""	TEXT NOT NULL,
+	                PRIMARY KEY(""idClient"" AUTOINCREMENT)
+                 )";
+
+                using (SQLiteCommand command = new SQLiteCommand(createTableQuery, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
         public void loadComenzi()
         {
+            EnsureDatabaseSetup();
             var query = "SELECT * FROM Comenzi";
             using (SQLiteConnection connection = new SQLiteConnection(connectionString))
             {
@@ -100,7 +125,7 @@ namespace Proiect
 
             Client clientDeSters = (Client)dgvLogComenzi.SelectedRows[0].DataBoundItem;
             comenzi.Remove(clientDeSters);
-            
+
         }
 
 
@@ -131,13 +156,13 @@ namespace Proiect
 
             form1.tbStrada.Text = "";
             string strada = form1.client.AdresaClient.ToString().Split(',')[0];
-            string[] stradaSplit=strada.Split(' ');
-            for(int i=1;i<stradaSplit.Length;i++)
+            string[] stradaSplit = strada.Split(' ');
+            for (int i = 1; i < stradaSplit.Length; i++)
             {
-                if(i == stradaSplit.Length - 1)
+                if (i == stradaSplit.Length - 1)
                     form1.tbStrada.Text += stradaSplit[i];
                 else
-                    form1.tbStrada.Text+= stradaSplit[i] + " ";
+                    form1.tbStrada.Text += stradaSplit[i] + " ";
             }
 
             form1.tbNr.Text = form1.client.AdresaClient.Nr.ToString();
@@ -160,12 +185,12 @@ namespace Proiect
             Client client = (Client)dgvLogComenzi.SelectedRows[0].DataBoundItem;
             string[] pizzeClient = client.pizzeToString().Split(';');
             string mesaj = "";
-            foreach(string pizza in pizzeClient)
+            foreach (string pizza in pizzeClient)
             {
                 mesaj += pizza + "\n";
             }
-            MessageBox.Show(mesaj,"Pizze Client");
-            
+            MessageBox.Show(mesaj, "Pizze Client");
+
         }
     }
 }
